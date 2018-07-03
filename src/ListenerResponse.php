@@ -5,9 +5,9 @@ namespace League\Event;
 use FromArray;
 
 class ListenerResponse implements ListenerResponseInterface {
-	use FromArray;
 	public function __construct(EventInterface $event = NULL) {
-		$this->setEvent ( $event );
+		if ($event)
+			$this->setEvent ( $event );
 	}
 	/**
 	 * Magic method required so array_column can be used to parse arrays of this object

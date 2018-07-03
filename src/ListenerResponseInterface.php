@@ -3,11 +3,6 @@
 namespace League\Event;
 
 interface ListenerResponseInterface {
-	private $event;
-	private $message;
-	private $data;
-	private $success;
-	
 	/**
 	 * Get the event object that triggered the response from the listener callback.
 	 *

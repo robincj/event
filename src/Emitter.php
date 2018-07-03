@@ -72,32 +72,32 @@ class Emitter implements EmitterInterface {
 	 *<!--
 	 * @formatter:off
 	 * -->
-   * <pre>
-   *     $listeners = [
-   *        'plan.delete' => function ($e, ...$d) {
-   *          $this->doThisThing ( $e, ...$d );
-   *        },
-   *        'plan.reject' => function ($e, ...$d) {
-   *          $this->doThisThing ( $e, ...$d );
-   *        },
-   *        'plan.approve' => [
-   *            function ($e, ...$d) {
-   *              echo "<br>This is the second plan.approve listener<br>";
-   *            },
-   *            function ($e, ...$d) {
-   *              echo "<br>This is the third plan.approve listener<br>";
-   *            }
-   *        ],
-   *        'plan.reject.*' => function ($e, ...$d) {
-   *          $this->doThisThing ( $e, ...$d );
-   *        }
-   *    ];
-   *
-   *    $listeners ['plan.approve'] [] = function ($e, ...$d) {
-   *      echo "<br>This is the fourth plan.approve listener<br>";
-   *    };
-   *    $this->addListenerBatch ( $listeners );
-   * </pre>
+	 * <pre>
+	 *     $listeners = [
+	 *        'plan.delete' => function ($e, ...$d) {
+	 *          $this->doThisThing ( $e, ...$d );
+	 *        },
+	 *        'plan.reject' => function ($e, ...$d) {
+	 *          $this->doThisThing ( $e, ...$d );
+	 *        },
+	 *        'plan.approve' => [
+	 *            function ($e, ...$d) {
+	 *              echo "<br>This is the second plan.approve listener<br>";
+	 *            },
+	 *            function ($e, ...$d) {
+	 *              echo "<br>This is the third plan.approve listener<br>";
+	 *            }
+	 *        ],
+	 *        'plan.reject.*' => function ($e, ...$d) {
+	 *          $this->doThisThing ( $e, ...$d );
+	 *        }
+	 *    ];
+	 *
+	 *    $listeners ['plan.approve'] [] = function ($e, ...$d) {
+	 *      echo "<br>This is the fourth plan.approve listener<br>";
+	 *    };
+	 *    $this->addListenerBatch ( $listeners );
+	 * </pre>
 	 * <!--
 	 * @formatter:off
 	 * -->
@@ -233,7 +233,7 @@ class Emitter implements EmitterInterface {
 	}
 	/**
 	 * Returns a list of registered listener names, including wildcard/regex listener names.
-	 * 
+	 *
 	 * @return array
 	 */
 	public function getListenerNames() {
@@ -250,12 +250,12 @@ class Emitter implements EmitterInterface {
 		list ( $name, $event ) = $this->prepareEvent ( $event );
 		if (! $this->batchMode)
 			$this->responses = $this->eventNames = [ ];
-		$arguments = [ 
-				$event 
-		] + func_get_args ();
-		$this->invokeListeners ( $name, $event, $arguments );
-		$this->invokeListeners ( '*', $event, $arguments );
-		return $event;
+			$arguments = [
+					$event
+			] + func_get_args ();
+			$this->invokeListeners ( $name, $event, $arguments );
+			$this->invokeListeners ( '*', $event, $arguments );
+			return $event;
 	}
 	/**
 	 * Emit a batch of events.
@@ -309,11 +309,19 @@ class Emitter implements EmitterInterface {
 			}
 			if ($event)
 				$this->eventNames [] = $event->getName ();
-			$this->responses [] = call_user_func_array ( [ 
-					$listener,
-					'handle' 
-			], $arguments );
+				$response = call_user_func_array ( [
+						$listener,
+						'handle'
+				], $arguments );
+				// If the response isn't a ListenerResponse then wrap it.
+				if (! is_a($response,'ListenerResponse')){
+					$l = new ListenerResponse($event);
+					$response = $l->setData($response);
+				}
+				$this->responses [] = $response;
 		}
+		
+		
 		return $this;
 	}
 	/**
@@ -328,9 +336,9 @@ class Emitter implements EmitterInterface {
 		$name = $event->getName ();
 		$event->setEmitter ( $this );
 		
-		return [ 
+		return [
 				$name,
-				$event 
+				$event
 		];
 	}
 	
@@ -369,7 +377,7 @@ class Emitter implements EmitterInterface {
 	 *
 	 * Returns an array of responses (returned values) from all listener callbacks invoked by the last emit() or emitBatch().
 	 *
-	 * @return array
+	 * @return ListenerResponse[];
 	 */
 	public function getResponses($where = NULL) {
 		$ret = $this->responses;
