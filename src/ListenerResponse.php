@@ -2,10 +2,8 @@
 
 namespace League\Event;
 
-use FromArray;
-
 class ListenerResponse implements ListenerResponseInterface {
-	use FromArray;
+	use FromArrayTrait;
 	public function __construct(EventInterface $event = NULL) {
 		if ($event)
 			$this->setEvent ( $event );

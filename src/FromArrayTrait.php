@@ -1,6 +1,8 @@
 <?php
 
-trait FromArray {
+namespace League\Event;
+
+trait FromArrayTrait {
 
     public static function fromArray(array $data = [])
     {
